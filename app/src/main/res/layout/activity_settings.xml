@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:background="@drawable/bg_image">
+
+    <LinearLayout
+        android:layout_width="600dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:elevation="4dp"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal">
+
+        <EditText
+            android:id="@+id/editText1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Field 1"
+            android:textSize="18sp"
+            android:background="@drawable/rounded_white"
+            android:textColorHint="@color/ColorPrimary"
+            android:inputType="text"
+            android:layout_marginBottom="16dp" />
+
+        <EditText
+            android:id="@+id/editText2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_white"
+            android:hint="Enter Field 2"
+            android:textColorHint="@color/ColorPrimary"
+            android:inputType="text"
+            android:layout_marginBottom="16dp" />
+
+        <Spinner
+            android:id="@+id/usertype_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Field 3"
+            android:textColorHint="@color/ColorPrimary"
+            android:background="@drawable/rounded_white"
+            android:foregroundTint="@color/ColorAccent"
+            android:inputType="text"
+            android:layout_marginBottom="24dp" />
+
+        <Button
+            android:id="@+id/save_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save"
+            android:padding="8dp"
+            android:backgroundTint="@color/ColorAccent"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+</LinearLayout>
