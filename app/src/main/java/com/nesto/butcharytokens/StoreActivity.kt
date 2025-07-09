@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView
 class StoreActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: TokenAdapter
-    private val tokenList = mutableListOf<Token>()
+//    private lateinit var adapter: TokenAdapter
+//    private val tokenList = mutableListOf<Token>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

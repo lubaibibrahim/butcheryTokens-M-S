@@ -37,6 +37,11 @@ android {
     buildFeatures {
         compose = true
     }
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 dependencies {
@@ -53,8 +58,9 @@ dependencies {
 
     implementation ("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-
-    implementation(mapOf("name" to "bixolon_pdf", "ext" to "aar"))
+    implementation(files("libs/bixolon_printer_V2.2.7.jar"))
+    implementation(files("libs/libcommon_V1.3.8.jar"))
+    implementation(files("libs/bixolon_pdf.aar"))
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

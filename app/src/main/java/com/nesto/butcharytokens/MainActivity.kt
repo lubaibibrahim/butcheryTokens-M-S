@@ -1,74 +1,166 @@
 package com.nesto.butcharytokens
 
+import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.bixolon.printer.BixolonPrinter
+import com.bxl.config.editor.BXLConfigLoader
+import jpos.POSPrinter
+import jpos.POSPrinterConst
+import jpos.JposException
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var etMobile: EditText
-    private lateinit var btnScan: Button
-    private lateinit var btnGenerate: Button
-    private lateinit var tvScannedCode: TextView
-    private var scannedCode: String? = null
-    private lateinit var bixolonPrinter: BixolonPrinter
     private lateinit var usbManager: UsbManager
-    private val ACTION_USB_PERMISSION = "com.yourapp.USB_PERMISSION"
+    private lateinit var etMobile: EditText
+    private lateinit var btnPrint: Button
 
+    private val ACTION_USB_PERMISSION = "com.nesto.butcharytokens.USB_PERMISSION"
+    private val logicalName = "SRP-350plusIII"
+    private var targetDevice: UsbDevice? = null
+    private lateinit var posPrinter: POSPrinter
+    private var isPrinterConnected = false
+
+    private val usbReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == ACTION_USB_PERMISSION) {
+                val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
+                val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
+
+                if (device != null && granted) {
+                    Toast.makeText(this@MainActivity, "USB permission granted", Toast.LENGTH_SHORT)
+                        .show()
+                    connectToPrinter()
+                } else {
+                    Toast.makeText(this@MainActivity, "USB permission denied", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+    }
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         etMobile = findViewById(R.id.et_mobile)
-        btnGenerate = findViewById(R.id.btn_generate_token)
+        btnPrint = findViewById(R.id.btn_generate_token)
 
         usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
-        bixolonPrinter = BixolonPrinter(this, mHandler, null)
+        posPrinter = POSPrinter(this)
 
-        connectToUsbPrinter()
-//        btnScan.setOnClickListener {
-//            // TODO: Integrate barcode scanner (ZXing / ML Kit / Intent)
-//            scannedCode = "INAAM12345678" // mock value
-//            tvScannedCode.text = "Scanned: $scannedCode"
-//        }
+        // Register receiver once during activity lifecycle
+        val filter = IntentFilter(ACTION_USB_PERMISSION)
+        registerReceiver(usbReceiver, filter)
 
-        btnGenerate.setOnClickListener {
+        btnPrint.setOnClickListener {
+            requestUsbPermission()
+            btnPrint.isEnabled = false
+            requestUsbPermission()
+            btnPrint.postDelayed({ btnPrint.isEnabled = true }, 2000)
         }
     }
-        private fun connectToUsbPrinter() {
-            val deviceList: HashMap<String, UsbDevice> = usbManager.deviceList
-            for (device in deviceList.values) {
-                if (BixolonPrinter.checkUsbDevice(device)) {
+
+    private fun requestUsbPermission() {
+        val deviceList = usbManager.deviceList
+        for (device in deviceList.values) {
+            if (device.vendorId == 5380) { // Bixolon vendor ID (decimal of 0x1504)
+                if (usbManager.hasPermission(device)) {
+                    Toast.makeText(this, "Already has permission", Toast.LENGTH_SHORT).show()
+                    connectToPrinter()
+                } else {
                     val permissionIntent = PendingIntent.getBroadcast(
-                        this, 0, Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE
+                        this,
+                        0,
+                        Intent(ACTION_USB_PERMISSION),
+                        PendingIntent.FLAG_IMMUTABLE
                     )
                     usbManager.requestPermission(device, permissionIntent)
-
-                    bixolonPrinter.connect(device)
-                    break
                 }
+                return
             }
         }
+        Toast.makeText(this, "No supported USB printer found", Toast.LENGTH_SHORT).show()
+    }
 
-        private val mHandler = android.os.Handler(android.os.Looper.getMainLooper()) {
-            when (it.what) {
-                BixolonPrinter.MESSAGE_STATE_CHANGE -> {
-                    when (it.arg1) {
-                        BixolonPrinter.STATE_CONNECTED -> {
-                            bixolonPrinter.printText("Token #123\nThank you\n", BixolonPrinter.TEXT_ALIGNMENT_CENTER, BixolonPrinter.TEXT_ATTRIBUTE_FONT_A, BixolonPrinter.TEXT_SIZE_HORIZONTAL1 or BixolonPrinter.TEXT_SIZE_VERTICAL1, false)
-                            bixolonPrinter.lineFeed(3, false)
-                            bixolonPrinter.cutPaper(true)
-                        }
-                    }
+
+    private fun connectToPrinter() {
+        try {
+            if (isPrinterConnected) {
+                try {
+                    posPrinter.release()
+                    posPrinter.close()
+                } catch (e: Exception) {
+                    Log.w("PrinterWarning", "Attempted to close an already closed printer", e)
                 }
+                isPrinterConnected = false
             }
-            true
+
+            val configLoader = BXLConfigLoader(this)
+            configLoader.addEntry(
+                logicalName,
+                BXLConfigLoader.DEVICE_CATEGORY_POS_PRINTER,
+                "BIXOLON",
+                BXLConfigLoader.DEVICE_BUS_USB,
+                ""
+            )
+            configLoader.saveFile()
+
+            posPrinter.open(logicalName)
+            posPrinter.claim(1000)
+            posPrinter.deviceEnabled = true
+            isPrinterConnected = true
+
+            val tokenNumber = "25"
+            val mobileNumber = etMobile.text.toString().trim()
+
+            val printText = buildString {
+                append("\u001b|cA\n")
+                append("Nesto Fish & Butchery\n")
+                append("------------------------------\n")
+                append("Token #: $tokenNumber\n")
+                append("Mobile: $mobileNumber\n")
+                append("------------------------------\n")
+                append("Please wait for your turn\n\n")
+                append("\u001b|1lF")
+            }
+
+            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, printText)
+
+        } catch (e: JposException) {
+            Toast.makeText(this, "Printing failed: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e("PrinterError", "JPOS Exception", e)
+            isPrinterConnected = false
+        } catch (e: Exception) {
+            Toast.makeText(this, "Unexpected error: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e("PrinterError", "Unexpected Exception", e)
+            isPrinterConnected = false
         }
     }
 
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            if (::posPrinter.isInitialized && isPrinterConnected) {
+                posPrinter.release()
+                posPrinter.close()
+                isPrinterConnected = false
+            }
+        } catch (e: Exception) {
+            Log.e("CleanupError", "Error closing printer", e)
+        }
+        unregisterReceiver(usbReceiver)
+    }
+}
