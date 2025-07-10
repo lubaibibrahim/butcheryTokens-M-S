@@ -62,6 +62,11 @@ dependencies {
     implementation(files("libs/libcommon_V1.3.8.jar"))
     implementation(files("libs/bixolon_pdf.aar"))
 
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.google.code.gson:gson:2.8.6")
+    implementation ("com.squareup.retrofit2:converter-gson:2.3.0")
+    implementation ("com.squareup.retrofit2:converter-scalars:2.1.0")
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

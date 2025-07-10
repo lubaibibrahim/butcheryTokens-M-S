@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
@@ -15,9 +17,16 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bxl.config.editor.BXLConfigLoader
+import com.nesto.butcharytokens.model.NewTokenRequest
+import com.nesto.butcharytokens.model.NewTokenResponse
+import com.nesto.butcharytokens.retrofit.ApiClient
+import com.nesto.butcharytokens.retrofit.ApiInterface
 import jpos.POSPrinter
 import jpos.POSPrinterConst
 import jpos.JposException
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,14 +36,16 @@ class MainActivity : AppCompatActivity() {
 
     private val ACTION_USB_PERMISSION = "com.nesto.butcharytokens.USB_PERMISSION"
     private val logicalName = "SRP-350plusIII"
-    private var targetDevice: UsbDevice? = null
     private lateinit var posPrinter: POSPrinter
     private var isPrinterConnected = false
 
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == ACTION_USB_PERMISSION) {
+//                val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
+//                val device: UsbDevice? = intent?.getParcelableExtra(UsbManager.EXTRA_DEVICE)
                 val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
+
                 val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
 
                 if (device != null && granted) {
@@ -65,10 +76,13 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(usbReceiver, filter)
 
         btnPrint.setOnClickListener {
-            requestUsbPermission()
-            btnPrint.isEnabled = false
-            requestUsbPermission()
-            btnPrint.postDelayed({ btnPrint.isEnabled = true }, 2000)
+//            requestUsbPermission()
+//            btnPrint.isEnabled = false
+//            requestUsbPermission()
+//            btnPrint.postDelayed({ btnPrint.isEnabled = true }, 2000)
+
+            val token=etMobile.text.toString()
+            GenerateToken(token,"0502241751")
         }
     }
 
@@ -96,18 +110,19 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun connectToPrinter() {
+
         try {
-            if (isPrinterConnected) {
-                try {
-                    posPrinter.release()
-                    posPrinter.close()
-                } catch (e: Exception) {
-                    Log.w("PrinterWarning", "Attempted to close an already closed printer", e)
-                }
-                isPrinterConnected = false
+            try {
+                posPrinter.release()
+            } catch (_: Exception) {
+            }
+            try {
+                posPrinter.close()
+            } catch (_: Exception) {
             }
 
             val configLoader = BXLConfigLoader(this)
+            configLoader.removeEntry(logicalName) // remove old config
             configLoader.addEntry(
                 logicalName,
                 BXLConfigLoader.DEVICE_CATEGORY_POS_PRINTER,
@@ -118,7 +133,8 @@ class MainActivity : AppCompatActivity() {
             configLoader.saveFile()
 
             posPrinter.open(logicalName)
-            posPrinter.claim(1000)
+            Thread.sleep(300)
+            posPrinter.claim(1000) // This line fails if device is locked or permission denied
             posPrinter.deviceEnabled = true
             isPrinterConnected = true
 
@@ -163,4 +179,70 @@ class MainActivity : AppCompatActivity() {
         }
         unregisterReceiver(usbReceiver)
     }
+
+    /////////////////////////
+
+    private fun GenerateToken(tokenNumber: String,contactNumber: String) {
+        val dialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.show()
+        val apiService = ApiClient.getClient(this).create(ApiInterface::class.java)
+        val call: Call<NewTokenResponse>
+
+        var request = NewTokenRequest()
+        request.token_number = tokenNumber
+        request.contact_number = contactNumber
+
+        call = apiService.GenerateToken(request)
+        call.enqueue(object : Callback<NewTokenResponse?> {
+
+            private var message: String? = null
+
+            override fun onResponse(
+                call: Call<NewTokenResponse??>,
+                response: Response<NewTokenResponse??>
+            ) {
+                if (response.isSuccessful()) {
+                    assert(response.body() != null)
+                    if (response.body()?.id!=null) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            response.body()?.id.toString(),
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                    } else {
+                        Toast.makeText(
+                            this@MainActivity,
+                            response.message(),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    Toast.makeText(
+                        this@MainActivity,
+                        response.message(),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                dialog.cancel()
+            }
+
+            override fun onFailure(call: Call<NewTokenResponse??>, t: Throwable) {
+                dialog.cancel()
+                Toast.makeText(
+                    applicationContext,
+                    t.message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
+
+    }
+
 }
