@@ -27,12 +27,17 @@ import jpos.JposException
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.media.AudioManager
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var usbManager: UsbManager
     private lateinit var etMobile: EditText
     private lateinit var btnPrint: Button
+    lateinit var malayalamSpeaker: MalayalamSpeaker
 
     private val ACTION_USB_PERMISSION = "com.nesto.butcharytokens.USB_PERMISSION"
     private val logicalName = "SRP-350plusIII"
@@ -49,8 +54,7 @@ class MainActivity : AppCompatActivity() {
                 val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
 
                 if (device != null && granted) {
-                    Toast.makeText(this@MainActivity, "USB permission granted", Toast.LENGTH_SHORT)
-                        .show()
+                    //  Toast.makeText(this@MainActivity, "USB permission granted", Toast.LENGTH_SHORT) .show()
                     connectToPrinter()
                 } else {
                     Toast.makeText(this@MainActivity, "USB permission denied", Toast.LENGTH_SHORT)
@@ -70,19 +74,28 @@ class MainActivity : AppCompatActivity() {
 
         usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
         posPrinter = POSPrinter(this)
+        malayalamSpeaker = MalayalamSpeaker(this)
 
         // Register receiver once during activity lifecycle
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         registerReceiver(usbReceiver, filter)
 
         btnPrint.setOnClickListener {
-//            requestUsbPermission()
-//            btnPrint.isEnabled = false
-//            requestUsbPermission()
-//            btnPrint.postDelayed({ btnPrint.isEnabled = true }, 2000)
+            val mobileNumber = etMobile.text.toString().trim()
 
-            val token=etMobile.text.toString()
-            GenerateToken(token,"0502241751")
+            //printing
+            requestUsbPermission()
+            btnPrint.isEnabled = false
+            btnPrint.postDelayed({ btnPrint.isEnabled = true }, 2000)
+
+//            text to speech
+//            setTTSVolumeMax()
+//            val malayalamText = "അബിൻ, നന്ദിയുണ്ടേ.....!"
+//            malayalamSpeaker.speak(malayalamText)
+
+            //sending token to backend
+//            val token=etMobile.text.toString()
+//            GenerateToken(token,"0502241751")
         }
     }
 
@@ -91,14 +104,11 @@ class MainActivity : AppCompatActivity() {
         for (device in deviceList.values) {
             if (device.vendorId == 5380) { // Bixolon vendor ID (decimal of 0x1504)
                 if (usbManager.hasPermission(device)) {
-                    Toast.makeText(this, "Already has permission", Toast.LENGTH_SHORT).show()
+                    //  Toast.makeText(this, "Already has permission", Toast.LENGTH_SHORT).show()
                     connectToPrinter()
                 } else {
                     val permissionIntent = PendingIntent.getBroadcast(
-                        this,
-                        0,
-                        Intent(ACTION_USB_PERMISSION),
-                        PendingIntent.FLAG_IMMUTABLE
+                        this, 0, Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE
                     )
                     usbManager.requestPermission(device, permissionIntent)
                 }
@@ -126,7 +136,7 @@ class MainActivity : AppCompatActivity() {
             configLoader.addEntry(
                 logicalName,
                 BXLConfigLoader.DEVICE_CATEGORY_POS_PRINTER,
-                "BIXOLON",
+                "SRP-350plusIII",
                 BXLConfigLoader.DEVICE_BUS_USB,
                 ""
             )
@@ -137,22 +147,10 @@ class MainActivity : AppCompatActivity() {
             posPrinter.claim(1000) // This line fails if device is locked or permission denied
             posPrinter.deviceEnabled = true
             isPrinterConnected = true
+            val currentTime =
+                SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
+            printTokenWithBixolon("25", "0501234567","Lubaib Ibrahim" ,posPrinter)
 
-            val tokenNumber = "25"
-            val mobileNumber = etMobile.text.toString().trim()
-
-            val printText = buildString {
-                append("\u001b|cA\n")
-                append("Nesto Fish & Butchery\n")
-                append("------------------------------\n")
-                append("Token #: $tokenNumber\n")
-                append("Mobile: $mobileNumber\n")
-                append("------------------------------\n")
-                append("Please wait for your turn\n\n")
-                append("\u001b|1lF")
-            }
-
-            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, printText)
 
         } catch (e: JposException) {
             Toast.makeText(this, "Printing failed: ${e.message}", Toast.LENGTH_LONG).show()
@@ -167,6 +165,7 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onDestroy() {
+        malayalamSpeaker.shutdown()
         super.onDestroy()
         try {
             if (::posPrinter.isInitialized && isPrinterConnected) {
@@ -182,12 +181,10 @@ class MainActivity : AppCompatActivity() {
 
     /////////////////////////
 
-    private fun GenerateToken(tokenNumber: String,contactNumber: String) {
+    private fun GenerateToken(tokenNumber: String, contactNumber: String) {
         val dialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
-        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(false)
-            .create()
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this).setView(dialogView)
+            .setCancelable(false).create()
 
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.show()
@@ -204,30 +201,23 @@ class MainActivity : AppCompatActivity() {
             private var message: String? = null
 
             override fun onResponse(
-                call: Call<NewTokenResponse??>,
-                response: Response<NewTokenResponse??>
+                call: Call<NewTokenResponse??>, response: Response<NewTokenResponse??>
             ) {
                 if (response.isSuccessful()) {
                     assert(response.body() != null)
-                    if (response.body()?.id!=null) {
+                    if (response.body()?.id != null) {
                         Toast.makeText(
-                            this@MainActivity,
-                            response.body()?.id.toString(),
-                            Toast.LENGTH_SHORT
+                            this@MainActivity, response.body()?.id.toString(), Toast.LENGTH_SHORT
                         ).show()
 
                     } else {
                         Toast.makeText(
-                            this@MainActivity,
-                            response.message(),
-                            Toast.LENGTH_SHORT
+                            this@MainActivity, response.message(), Toast.LENGTH_SHORT
                         ).show()
                     }
                 } else {
                     Toast.makeText(
-                        this@MainActivity,
-                        response.message(),
-                        Toast.LENGTH_SHORT
+                        this@MainActivity, response.message(), Toast.LENGTH_SHORT
                     ).show()
                 }
                 dialog.cancel()
@@ -236,13 +226,80 @@ class MainActivity : AppCompatActivity() {
             override fun onFailure(call: Call<NewTokenResponse??>, t: Throwable) {
                 dialog.cancel()
                 Toast.makeText(
-                    applicationContext,
-                    t.message,
-                    Toast.LENGTH_SHORT
+                    applicationContext, t.message, Toast.LENGTH_SHORT
                 ).show()
             }
         })
 
+    }
+
+    private fun setTTSVolumeMax() {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.setStreamVolume(
+            AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0
+        )
+    }
+
+
+    fun printTokenWithBixolon(
+        tokenNumber: String,
+        mobileNumber: String,
+        name: String,
+        posPrinter: jpos.POSPrinter
+    ) {
+        try {
+            val currentTime =
+                SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
+
+            val header = """
+            NESTO FRESH
+            JVC Branch - Dubai
+            Cashier: System User
+            $currentTime
+            ------------------------------
+        """.trimIndent()
+
+
+            // Token info (center aligned, bold token details)
+            val tokenInfo = buildString {
+                append("\u001b|cA")              // Center alignment
+                append("\u001b|bC\u001b|4C") //Big font
+                append("Token: $tokenNumber\n")
+                append("\u001b|1C") //Back to normal font
+                append("Mobile : $mobileNumber\n")
+                append("Customer: $name\n")
+                append("\u001b|N")
+                append("\u001b|cA")
+                append("------------------------------\n")
+                append("Get notified once the item is ready!\n")
+                append("Scan the QR code to know the status\n")
+            }
+
+            // Print header
+            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, header)
+            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, "\n")
+
+            // Print barcode
+            posPrinter.printBarCode(
+                POSPrinterConst.PTR_S_RECEIPT,
+                tokenNumber, // Use token as QR content
+                POSPrinterConst.PTR_BCS_QRCODE,
+                8,
+                8,
+                POSPrinterConst.PTR_BC_CENTER,
+                POSPrinterConst.PTR_BC_TEXT_BELOW
+            )
+
+            // Print token info
+            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, tokenInfo)
+
+            // Feed & cut
+            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, "\n\n\n\n\n")
+            posPrinter.cutPaper(90)
+
+        } catch (e: JposException) {
+            Log.e("BIXOLON", "Print error: ${e.message}", e)
+        }
     }
 
 }
