@@ -17,7 +17,7 @@
 
         <!-- Mobile Number Input -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="700dp"
             android:layout_height="60dp"
             android:orientation="horizontal"
             android:background="@drawable/rounded_white"
@@ -39,15 +39,17 @@
                 android:hint="Enter Mobile Number / Inaam number"
                 android:background="@android:color/transparent"
                 android:textSize="18sp"
+                android:maxLength="10"
+                android:focusable="true"
                 android:textColorHint="@color/ColorPrimary"
                 android:paddingStart="12dp"
-                android:inputType="phone" />
-
+                android:inputType="number" />
+            <requestFocus />
         </LinearLayout>
 
         <Button
             android:id="@+id/btn_generate_token"
-            android:layout_width="match_parent"
+            android:layout_width="700dp"
             android:layout_height="60dp"
             android:backgroundTint="#1FAA59"
             android:textAllCaps="false"

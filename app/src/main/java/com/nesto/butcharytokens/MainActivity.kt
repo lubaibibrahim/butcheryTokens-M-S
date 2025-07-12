@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.hardware.usb.UsbDevice
@@ -37,8 +38,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var usbManager: UsbManager
     private lateinit var etMobile: EditText
     private lateinit var btnPrint: Button
+    private lateinit var mobileNumber: String
+    private lateinit var storeId: String
     lateinit var malayalamSpeaker: MalayalamSpeaker
 
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
     private val ACTION_USB_PERMISSION = "com.nesto.butcharytokens.USB_PERMISSION"
     private val logicalName = "SRP-350plusIII"
     private lateinit var posPrinter: POSPrinter
@@ -47,10 +52,8 @@ class MainActivity : AppCompatActivity() {
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == ACTION_USB_PERMISSION) {
-//                val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
-//                val device: UsbDevice? = intent?.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-                val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
 
+                val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
                 val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
 
                 if (device != null && granted) {
@@ -76,12 +79,17 @@ class MainActivity : AppCompatActivity() {
         posPrinter = POSPrinter(this)
         malayalamSpeaker = MalayalamSpeaker(this)
 
+
+        sharedPreferences = this.getSharedPreferences("sharedpreferences", Context.MODE_PRIVATE)
+        editor = sharedPreferences.edit()
+        storeId = sharedPreferences.getString("storeId", "").toString()
+
         // Register receiver once during activity lifecycle
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         registerReceiver(usbReceiver, filter)
 
         btnPrint.setOnClickListener {
-            val mobileNumber = etMobile.text.toString().trim()
+            mobileNumber = etMobile.text.toString().trim()
 
             //printing
             requestUsbPermission()
@@ -95,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
             //sending token to backend
 //            val token=etMobile.text.toString()
-//            GenerateToken(token,"0502241751")
+//            GenerateToken(token,"0502241751",storeId)
         }
     }
 
@@ -147,10 +155,9 @@ class MainActivity : AppCompatActivity() {
             posPrinter.claim(1000) // This line fails if device is locked or permission denied
             posPrinter.deviceEnabled = true
             isPrinterConnected = true
-            val currentTime =
-                SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
-            printTokenWithBixolon("25", "0501234567","Lubaib Ibrahim" ,posPrinter)
-
+            val currentTime =SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
+            val tokenNo = generateTokenNumber(this, storeId)
+            printTokenWithBixolon(tokenNo, mobileNumber,"Lubaib Ibrahim" ,posPrinter)
 
         } catch (e: JposException) {
             Toast.makeText(this, "Printing failed: ${e.message}", Toast.LENGTH_LONG).show()
@@ -181,7 +188,7 @@ class MainActivity : AppCompatActivity() {
 
     /////////////////////////
 
-    private fun GenerateToken(tokenNumber: String, contactNumber: String) {
+    private fun GenerateToken(tokenNumber: String, contactNumber: String,storeId:String) {
         val dialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this).setView(dialogView)
             .setCancelable(false).create()
@@ -238,6 +245,21 @@ class MainActivity : AppCompatActivity() {
         audioManager.setStreamVolume(
             AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0
         )
+    }
+
+    fun generateTokenNumber(context: Context, storeId: String): String {
+        if (storeId.length != 4) throw IllegalArgumentException("Store ID must be 4 digits")
+        val date = SimpleDateFormat("ddMMyy", Locale.getDefault()).format(Date())
+
+        var lastSequence = sharedPreferences.getInt("last_sequence", 0)
+        val newSequence = (lastSequence + 1).coerceAtMost(999)
+        val sequenceStr = newSequence.toString().padStart(3, '0')
+
+        editor.putInt("last_sequence", newSequence)
+        editor.putString("last_date", date)
+        editor.apply()
+
+        return "$storeId$date$sequenceStr"
     }
 
 
