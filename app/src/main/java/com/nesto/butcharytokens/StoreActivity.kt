@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,7 +31,7 @@ class StoreActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recycler_tokens)
         recyclerView.layoutManager = GridLayoutManager(this, 2) // 2 tiles per row
 
-        sharedPreferences = this.getSharedPreferences("sharedpreferences", Context.MODE_PRIVATE)
+        sharedPreferences = this.getSharedPreferences("sharedpreferences", MODE_PRIVATE)
         editor = sharedPreferences.edit()
         var storeId = sharedPreferences.getString("storeId", "")
 
@@ -39,7 +40,7 @@ class StoreActivity : AppCompatActivity() {
 
     private fun Tokenlist(storeId: String) {
         val dialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
-        val dialog = androidx.appcompat.app.AlertDialog.Builder(this).setView(dialogView)
+        val dialog = AlertDialog.Builder(this).setView(dialogView)
             .setCancelable(false).create()
 
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -59,7 +60,10 @@ class StoreActivity : AppCompatActivity() {
                     assert(response.body() != null)
                     if (response.body() != null) {
 
-                        val adapter = TokenAdapter(response.body())
+                        val adapter = TokenAdapter(
+                            this@StoreActivity,
+                            response.body()
+                        )
                         recyclerView.adapter = adapter
 
 
@@ -85,5 +89,6 @@ class StoreActivity : AppCompatActivity() {
         })
 
     }
+
 
 }

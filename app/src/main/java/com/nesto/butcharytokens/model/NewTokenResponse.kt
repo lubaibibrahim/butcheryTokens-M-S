@@ -4,6 +4,15 @@ import com.google.gson.annotations.SerializedName
 
 data class NewTokenResponse(
 
+	@field:SerializedName("name")
+	val name: String? = null,
+
+	@field:SerializedName("token")
+	val token: Token? = null
+)
+
+data class Token(
+
 	@field:SerializedName("customer_url")
 	val customerUrl: Any? = null,
 
@@ -18,6 +27,9 @@ data class NewTokenResponse(
 
 	@field:SerializedName("token_number")
 	val tokenNumber: String? = null,
+
+	@field:SerializedName("store")
+	val store: String? = null,
 
 	@field:SerializedName("contact_number")
 	val contactNumber: String? = null,

@@ -26,9 +26,11 @@ import jpos.POSPrinter
 import jpos.POSPrinterConst
 import jpos.JposException
 import retrofit2.Call
+import android.view.animation.AnimationUtils
 import retrofit2.Callback
 import retrofit2.Response
 import android.media.AudioManager
+import android.widget.ImageView
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPrint: Button
     private lateinit var mobileNumber: String
     private lateinit var storeId: String
-    lateinit var malayalamSpeaker: MalayalamSpeaker
+    lateinit var englishSpeaker: EnglishSpeaker
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
@@ -74,10 +76,13 @@ class MainActivity : AppCompatActivity() {
 
         etMobile = findViewById(R.id.et_mobile)
         btnPrint = findViewById(R.id.btn_generate_token)
+        val fishImage = findViewById<ImageView>(R.id.fishImage)
+        val animation = AnimationUtils.loadAnimation(this, R.anim.move_fish)
+        fishImage.startAnimation(animation)
 
         usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
         posPrinter = POSPrinter(this)
-        malayalamSpeaker = MalayalamSpeaker(this)
+        englishSpeaker = EnglishSpeaker(this)
 
 
         sharedPreferences = this.getSharedPreferences("sharedpreferences", Context.MODE_PRIVATE)
@@ -90,20 +95,13 @@ class MainActivity : AppCompatActivity() {
 
         btnPrint.setOnClickListener {
             mobileNumber = etMobile.text.toString().trim()
+            UploadToken("565", mobileNumber, storeId)
 
-            //printing
+//            //printing
             requestUsbPermission()
             btnPrint.isEnabled = false
             btnPrint.postDelayed({ btnPrint.isEnabled = true }, 2000)
 
-//            text to speech
-//            setTTSVolumeMax()
-//            val malayalamText = "അബിൻ, നന്ദിയുണ്ടേ.....!"
-//            malayalamSpeaker.speak(malayalamText)
-
-            //sending token to backend
-//            val token=etMobile.text.toString()
-//            GenerateToken(token,"0502241751",storeId)
         }
     }
 
@@ -155,9 +153,10 @@ class MainActivity : AppCompatActivity() {
             posPrinter.claim(1000) // This line fails if device is locked or permission denied
             posPrinter.deviceEnabled = true
             isPrinterConnected = true
-            val currentTime =SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
+            val currentTime =
+                SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
             val tokenNo = generateTokenNumber(this, storeId)
-            printTokenWithBixolon(tokenNo, mobileNumber,"Lubaib Ibrahim" ,posPrinter)
+            printTokenWithBixolon(tokenNo, mobileNumber, "Lubaib Ibrahim", posPrinter)
 
         } catch (e: JposException) {
             Toast.makeText(this, "Printing failed: ${e.message}", Toast.LENGTH_LONG).show()
@@ -172,7 +171,7 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onDestroy() {
-        malayalamSpeaker.shutdown()
+        englishSpeaker.shutdown()
         super.onDestroy()
         try {
             if (::posPrinter.isInitialized && isPrinterConnected) {
@@ -188,7 +187,7 @@ class MainActivity : AppCompatActivity() {
 
     /////////////////////////
 
-    private fun UploadToken(tokenNumber: String, contactNumber: String,storeId:String) {
+    private fun UploadToken(tokenNumber: String, contactNumber: String, storeId: String) {
         val dialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this).setView(dialogView)
             .setCancelable(false).create()
@@ -213,11 +212,11 @@ class MainActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful()) {
                     assert(response.body() != null)
-                    if (response.body()?.id != null) {
-                        Toast.makeText(
-                            this@MainActivity, response.body()?.id.toString(), Toast.LENGTH_SHORT
-                        ).show()
-
+                    if (response.body()?.name?.isEmpty() != true) {
+//                      text to speech
+                        setTTSVolumeMax()
+                        val Text = "Thank you "+response.body()?.name
+                        englishSpeaker.speak(Text)
                     } else {
                         Toast.makeText(
                             this@MainActivity, response.message(), Toast.LENGTH_SHORT
@@ -264,8 +263,8 @@ class MainActivity : AppCompatActivity() {
             lastSequence = 0
         }
 
-        val newSequence = (lastSequence + 1).coerceAtMost(999)
-        val sequenceStr = newSequence.toString().padStart(3, '0')
+        val newSequence = (lastSequence + 1).coerceAtMost(9999)
+        val sequenceStr = newSequence.toString().padStart(4, '0')
 
         editor.putInt("last_sequence", newSequence)
         editor.putString("last_date", date)
@@ -332,7 +331,7 @@ class MainActivity : AppCompatActivity() {
                 posPrinter.cutPaper(90)
             }
 
-            UploadToken(tokenNumber,mobileNumber,storeId)
+            UploadToken(tokenNumber, mobileNumber, storeId)
         } catch (e: JposException) {
             Log.e("BIXOLON", "Print error: ${e.message}", e)
         }

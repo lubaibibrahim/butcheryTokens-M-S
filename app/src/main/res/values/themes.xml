@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ButcharyTokens" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Theme.ButcharyTokens" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="android:typeface">sans</item>
+    </style>
 </resources>

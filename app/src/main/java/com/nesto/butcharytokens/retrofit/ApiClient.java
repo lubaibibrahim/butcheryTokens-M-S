@@ -12,7 +12,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class ApiClient {
 
     public static String BASE_URL = "https://butchapi.nestoonline.com/token/";
-//    public static String BASE_URL = "https://butchapi.nestoonline.com/tokens/";
+
     private static Retrofit retrofit = null;
 
     public static Retrofit getClient(Context context) {
