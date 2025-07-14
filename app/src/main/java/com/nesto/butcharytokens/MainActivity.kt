@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity() {
 
     /////////////////////////
 
-    private fun GenerateToken(tokenNumber: String, contactNumber: String,storeId:String) {
+    private fun UploadToken(tokenNumber: String, contactNumber: String,storeId:String) {
         val dialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this).setView(dialogView)
             .setCancelable(false).create()
@@ -201,6 +201,7 @@ class MainActivity : AppCompatActivity() {
         var request = NewTokenRequest()
         request.token_number = tokenNumber
         request.contact_number = contactNumber
+        request.store = storeId
 
         call = apiService.GenerateToken(request)
         call.enqueue(object : Callback<NewTokenResponse?> {
@@ -249,9 +250,20 @@ class MainActivity : AppCompatActivity() {
 
     fun generateTokenNumber(context: Context, storeId: String): String {
         if (storeId.length != 4) throw IllegalArgumentException("Store ID must be 4 digits")
-        val date = SimpleDateFormat("ddMMyy", Locale.getDefault()).format(Date())
 
-        var lastSequence = sharedPreferences.getInt("last_sequence", 0)
+        val prefs = context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+
+        val date = SimpleDateFormat("ddMMyy", Locale.getDefault()).format(Date())
+        val lastDate = prefs.getString("last_date", "")
+
+        var lastSequence = prefs.getInt("last_sequence", 0)
+
+        // Reset sequence if it's a new day
+        if (date != lastDate) {
+            lastSequence = 0
+        }
+
         val newSequence = (lastSequence + 1).coerceAtMost(999)
         val sequenceStr = newSequence.toString().padStart(3, '0')
 
@@ -276,7 +288,6 @@ class MainActivity : AppCompatActivity() {
             val header = """
             NESTO FRESH
             JVC Branch - Dubai
-            Cashier: System User
             $currentTime
             ------------------------------
         """.trimIndent()
@@ -286,7 +297,7 @@ class MainActivity : AppCompatActivity() {
             val tokenInfo = buildString {
                 append("\u001b|cA")              // Center alignment
                 append("\u001b|bC\u001b|4C") //Big font
-                append("Token: $tokenNumber\n")
+                append("Token: ${tokenNumber.takeLast(3)}\n")
                 append("\u001b|1C") //Back to normal font
                 append("Mobile : $mobileNumber\n")
                 append("Customer: $name\n")
@@ -297,28 +308,31 @@ class MainActivity : AppCompatActivity() {
                 append("Scan the QR code to know the status\n")
             }
 
-            // Print header
-            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, header)
-            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, "\n")
+            repeat(2) {   // 2copies of printouts
+                // Print header
+                posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, header)
+                posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, "\n")
 
-            // Print barcode
-            posPrinter.printBarCode(
-                POSPrinterConst.PTR_S_RECEIPT,
-                tokenNumber, // Use token as QR content
-                POSPrinterConst.PTR_BCS_QRCODE,
-                8,
-                8,
-                POSPrinterConst.PTR_BC_CENTER,
-                POSPrinterConst.PTR_BC_TEXT_BELOW
-            )
+                // Print barcode
+                posPrinter.printBarCode(
+                    POSPrinterConst.PTR_S_RECEIPT,
+                    tokenNumber, // Use token as QR content
+                    POSPrinterConst.PTR_BCS_QRCODE,
+                    8,
+                    8,
+                    POSPrinterConst.PTR_BC_CENTER,
+                    POSPrinterConst.PTR_BC_TEXT_BELOW
+                )
 
-            // Print token info
-            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, tokenInfo)
+                // Print token info
+                posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, tokenInfo)
 
-            // Feed & cut
-            posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, "\n\n\n\n\n")
-            posPrinter.cutPaper(90)
+                // Feed & cut
+                posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, "\n\n\n\n\n")
+                posPrinter.cutPaper(90)
+            }
 
+            UploadToken(tokenNumber,mobileNumber,storeId)
         } catch (e: JposException) {
             Log.e("BIXOLON", "Print error: ${e.message}", e)
         }

@@ -33,7 +33,7 @@ class TokenAdapter(private val tokenList: ArrayList<TokenlistResponseItem>?) :
 
         if (token != null) {
             holder.status.text = "Status: ${token.status}"
-            holder.tokenNumber.text = "Token #: ${token.tokenNumber}"
+            holder.tokenNumber.text = "Token #: ${token.tokenNumber?.takeLast(3)}"
             holder.contactNumber.text = "Contact: ${token.contactNumber}"
         }
 
