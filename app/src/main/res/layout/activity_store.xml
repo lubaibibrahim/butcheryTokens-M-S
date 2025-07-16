@@ -11,7 +11,7 @@
         android:id="@+id/tv_heading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Active Tokens"
+        android:text="@string/active_tokens"
         android:textSize="26sp"
         android:gravity="center"
         android:textStyle="bold"

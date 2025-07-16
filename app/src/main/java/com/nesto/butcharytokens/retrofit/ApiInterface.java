@@ -25,6 +25,6 @@ public interface ApiInterface {
     Call<TokenStatusUpdateResponse> UpdateStatus(@Path("token") String token);
 
     @GET("list/")
-    Call<ArrayList<TokenlistResponseItem>> Tokenlist(@Query("store") String store);
+    Call<ArrayList<TokenlistResponseItem>> Tokenlist(@Query("store") String store,@Query("dept") String dept);
 
    }

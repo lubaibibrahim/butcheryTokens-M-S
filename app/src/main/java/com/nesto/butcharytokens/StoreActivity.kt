@@ -1,10 +1,11 @@
 package com.nesto.butcharytokens
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +24,8 @@ class StoreActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
+    private lateinit var storeId: String
+    private lateinit var dept: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,12 +36,35 @@ class StoreActivity : AppCompatActivity() {
 
         sharedPreferences = this.getSharedPreferences("sharedpreferences", MODE_PRIVATE)
         editor = sharedPreferences.edit()
-        var storeId = sharedPreferences.getString("storeId", "")
+        storeId = sharedPreferences.getString("storeId", "").toString()
+        dept = sharedPreferences.getString("depttype", "").toString()
 
-        Tokenlist(storeId.toString())
+        Tokenlist(storeId.toString(),dept)
     }
 
-    private fun Tokenlist(storeId: String) {
+    private val handler = Handler(Looper.getMainLooper())
+    private val refreshRunnable = object : Runnable {
+        override fun run() {
+            callApi()
+            handler.postDelayed(this, 60_000) // 60 seconds
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        handler.post(refreshRunnable)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(refreshRunnable)
+    }
+
+    private fun callApi() {
+        Tokenlist(storeId.toString(),dept)
+    }
+
+    private fun Tokenlist(storeId: String, depttype: String?) {
         val dialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView)
             .setCancelable(false).create()
@@ -48,7 +74,7 @@ class StoreActivity : AppCompatActivity() {
         val apiService = ApiClient.getClient(this).create(ApiInterface::class.java)
         val call: Call<ArrayList<TokenlistResponseItem>>
 
-        call = apiService.Tokenlist(storeId)
+        call = apiService.Tokenlist(storeId,depttype)
         call.enqueue(object : Callback<ArrayList<TokenlistResponseItem>> {
 
             private var message: String? = null
@@ -89,6 +115,5 @@ class StoreActivity : AppCompatActivity() {
         })
 
     }
-
 
 }

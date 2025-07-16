@@ -10,6 +10,9 @@ data class NewTokenRequest(
     @field:SerializedName("contact_number")
     var contact_number: String? = null,
 
+    @field:SerializedName("dept")
+    var dept: String? = null,
+
     @field:SerializedName("store")
     var store: String? = null
 )

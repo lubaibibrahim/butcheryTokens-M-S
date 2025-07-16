@@ -20,7 +20,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
     private lateinit var selectedUser: String
-    private lateinit var selectedDept: String
+    private var selectedDept: String=""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -30,6 +30,8 @@ import android.view.animation.AnimationUtils
 import retrofit2.Callback
 import retrofit2.Response
 import android.media.AudioManager
+import android.os.Handler
+import android.os.Looper
 import android.widget.ImageView
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -42,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPrint: Button
     private lateinit var mobileNumber: String
     private lateinit var storeId: String
+    private lateinit var dept: String
     private lateinit var tokenNo: String
     private var CustomerName: String=""
     lateinit var englishSpeaker: EnglishSpeaker
@@ -89,10 +92,10 @@ class MainActivity : AppCompatActivity() {
         posPrinter = POSPrinter(this)
         englishSpeaker = EnglishSpeaker(this)
 
-
         sharedPreferences = this.getSharedPreferences("sharedpreferences", Context.MODE_PRIVATE)
         editor = sharedPreferences.edit()
         storeId = sharedPreferences.getString("storeId", "").toString()
+        dept= intent.getStringExtra("dept").toString()
 
         backbtn.setOnClickListener {
             onBackPressed()
@@ -104,12 +107,13 @@ class MainActivity : AppCompatActivity() {
         btnPrint.setOnClickListener {
             mobileNumber = etMobile.text.toString().trim()
             tokenNo = generateTokenNumber(this, storeId)
-            UploadToken(tokenNo, mobileNumber, storeId)
-
+            if(!mobileNumber.equals("")) {
+                UploadToken(tokenNo, mobileNumber, storeId)
+            }else{
+                Toast.makeText(this, "Please enter a valid mobile/Inaam number!", Toast.LENGTH_SHORT).show()
+            }
 //            //printing
-            requestUsbPermission()
-            btnPrint.isEnabled = false
-            btnPrint.postDelayed({ btnPrint.isEnabled = true }, 2000)
+
 
         }
     }
@@ -209,12 +213,11 @@ class MainActivity : AppCompatActivity() {
         var request = NewTokenRequest()
         request.token_number = tokenNumber
         request.contact_number = contactNumber
+        request.dept = dept
         request.store = storeId
 
         call = apiService.GenerateToken(request)
         call.enqueue(object : Callback<NewTokenResponse?> {
-
-            private var message: String? = null
 
             override fun onResponse(
                 call: Call<NewTokenResponse??>, response: Response<NewTokenResponse??>
@@ -227,6 +230,10 @@ class MainActivity : AppCompatActivity() {
                         setTTSVolumeMax()
                         val Text = "Thank you "+response.body()?.name
                         englishSpeaker.speak(Text)
+
+                        requestUsbPermission()
+                        btnPrint.isEnabled = false
+                        btnPrint.postDelayed({ btnPrint.isEnabled = true }, 2000)
                     } else {
                         Toast.makeText(
                             this@MainActivity, response.message(), Toast.LENGTH_SHORT
@@ -238,6 +245,7 @@ class MainActivity : AppCompatActivity() {
                     ).show()
                 }
                 dialog.cancel()
+                finish()
             }
 
             override fun onFailure(call: Call<NewTokenResponse??>, t: Throwable) {
@@ -291,12 +299,11 @@ class MainActivity : AppCompatActivity() {
         posPrinter: jpos.POSPrinter
     ) {
         try {
-            val currentTime =
-                SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
-
+            val deptValue = dept.replaceFirstChar { it.uppercase() }
+            val currentTime =SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
             val header = """
+            $deptValue
             NESTO FRESH
-            JVC Branch - Dubai
             $currentTime
             ------------------------------
         """.trimIndent()
@@ -341,10 +348,9 @@ class MainActivity : AppCompatActivity() {
                 posPrinter.cutPaper(90)
             }
 
-//            UploadToken(tokenNumber, mobileNumber, storeId)
+
         } catch (e: JposException) {
             Log.e("BIXOLON", "Print error: ${e.message}", e)
         }
     }
-
 }
