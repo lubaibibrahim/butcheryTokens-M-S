@@ -16,26 +16,6 @@
         android:layout_gravity="center"
         android:gravity="center_horizontal">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Field 1"
-            android:textSize="16sp"
-            android:visibility="gone"
-            android:textColor="@color/ColorPrimary"
-            android:layout_marginBottom="4dp" />
-
-        <EditText
-            android:id="@+id/editText1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Field 1"
-            android:visibility="gone"
-            android:textSize="18sp"
-            android:background="@drawable/rounded_white"
-            android:textColorHint="@color/ColorPrimary"
-            android:inputType="text"
-            android:layout_marginBottom="16dp" />
 
         <TextView
             android:layout_width="match_parent"
@@ -65,6 +45,23 @@
 
         <Spinner
             android:id="@+id/usertype_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_white"
+            android:padding="12dp"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:id="@+id/dept_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/department"
+            android:textSize="16sp"
+            android:textColor="@color/ColorPrimary"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/depttype_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_white"

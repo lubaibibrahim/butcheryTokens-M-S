@@ -42,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPrint: Button
     private lateinit var mobileNumber: String
     private lateinit var storeId: String
+    private lateinit var tokenNo: String
+    private var CustomerName: String=""
     lateinit var englishSpeaker: EnglishSpeaker
 
     private lateinit var sharedPreferences: SharedPreferences
@@ -75,10 +77,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         etMobile = findViewById(R.id.et_mobile)
+        var backbtn = findViewById<ImageView>(R.id.backbtn)
         btnPrint = findViewById(R.id.btn_generate_token)
         val fishImage = findViewById<ImageView>(R.id.fishImage)
+        val bubble_image = findViewById<ImageView>(R.id.bubble_image)
         val animation = AnimationUtils.loadAnimation(this, R.anim.move_fish)
         fishImage.startAnimation(animation)
+        bubble_image.startAnimation(animation)
 
         usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
         posPrinter = POSPrinter(this)
@@ -89,13 +94,17 @@ class MainActivity : AppCompatActivity() {
         editor = sharedPreferences.edit()
         storeId = sharedPreferences.getString("storeId", "").toString()
 
+        backbtn.setOnClickListener {
+            onBackPressed()
+        }
         // Register receiver once during activity lifecycle
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         registerReceiver(usbReceiver, filter)
 
         btnPrint.setOnClickListener {
             mobileNumber = etMobile.text.toString().trim()
-            UploadToken("565", mobileNumber, storeId)
+            tokenNo = generateTokenNumber(this, storeId)
+            UploadToken(tokenNo, mobileNumber, storeId)
 
 //            //printing
             requestUsbPermission()
@@ -155,8 +164,8 @@ class MainActivity : AppCompatActivity() {
             isPrinterConnected = true
             val currentTime =
                 SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
-            val tokenNo = generateTokenNumber(this, storeId)
-            printTokenWithBixolon(tokenNo, mobileNumber, "Lubaib Ibrahim", posPrinter)
+
+            printTokenWithBixolon(tokenNo, mobileNumber, CustomerName, posPrinter)
 
         } catch (e: JposException) {
             Toast.makeText(this, "Printing failed: ${e.message}", Toast.LENGTH_LONG).show()
@@ -213,6 +222,7 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful()) {
                     assert(response.body() != null)
                     if (response.body()?.name?.isEmpty() != true) {
+                        CustomerName= response.body()?.name.toString()
 //                      text to speech
                         setTTSVolumeMax()
                         val Text = "Thank you "+response.body()?.name
@@ -296,9 +306,9 @@ class MainActivity : AppCompatActivity() {
             val tokenInfo = buildString {
                 append("\u001b|cA")              // Center alignment
                 append("\u001b|bC\u001b|4C") //Big font
-                append("Token: ${tokenNumber.takeLast(3)}\n")
+                append("Token: ${tokenNumber.takeLast(4)}\n")
                 append("\u001b|1C") //Back to normal font
-                append("Mobile : $mobileNumber\n")
+                append("$mobileNumber\n")
                 append("Customer: $name\n")
                 append("\u001b|N")
                 append("\u001b|cA")
@@ -307,7 +317,7 @@ class MainActivity : AppCompatActivity() {
                 append("Scan the QR code to know the status\n")
             }
 
-            repeat(2) {   // 2copies of printouts
+            repeat(1) {   // 2copies of printouts
                 // Print header
                 posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, header)
                 posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, "\n")
@@ -331,7 +341,7 @@ class MainActivity : AppCompatActivity() {
                 posPrinter.cutPaper(90)
             }
 
-            UploadToken(tokenNumber, mobileNumber, storeId)
+//            UploadToken(tokenNumber, mobileNumber, storeId)
         } catch (e: JposException) {
             Log.e("BIXOLON", "Print error: ${e.message}", e)
         }

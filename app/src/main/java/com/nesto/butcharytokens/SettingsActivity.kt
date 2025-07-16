@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.nesto.butcharytokens.SplashActivity
@@ -18,7 +19,8 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
-    private lateinit var selected: String
+    private lateinit var selectedUser: String
+    private lateinit var selectedDept: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,22 +32,51 @@ class SettingsActivity : AppCompatActivity() {
         val store_id = findViewById<EditText>(R.id.store_id)
         val save_btn = findViewById<Button>(R.id.save_btn)
         val usertype_spinner = findViewById<Spinner>(R.id.usertype_spinner)
+        val depttype_spinner = findViewById<Spinner>(R.id.depttype_spinner)
+        val dept_title = findViewById<TextView>(R.id.dept_title)
 
-        val adapter = ArrayAdapter.createFromResource(
+        val Deptadapter = ArrayAdapter.createFromResource(
+            this,                      // context
+            R.array.dept_type_options,        // array resource
+            android.R.layout.simple_spinner_item // layout for each item
+        )
+        Deptadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        depttype_spinner.adapter = Deptadapter
+
+        val user_adapter = ArrayAdapter.createFromResource(
             this,                      // context
             R.array.user_type_options,        // array resource
             android.R.layout.simple_spinner_item // layout for each item
         )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        usertype_spinner.adapter = adapter
+        user_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        usertype_spinner.adapter = user_adapter
 
         usertype_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>, view: View, position: Int, id: Long
             ) {
-                selected = parent.getItemAtPosition(position).toString()
-//                Toast.makeText(this@SettingsActivity, "Selected: $selected", Toast.LENGTH_SHORT)
-//                    .show()
+                selectedUser = parent.getItemAtPosition(position).toString()
+                if(selectedUser.equals("store")){
+                    depttype_spinner.visibility= View.VISIBLE
+                    dept_title.visibility= View.VISIBLE
+                }else{
+                    depttype_spinner.visibility= View.GONE
+                    dept_title.visibility= View.GONE
+                }
+
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // Optional
+            }
+        }
+
+        depttype_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>, view: View, position: Int, id: Long
+            ) {
+                selectedDept = parent.getItemAtPosition(position).toString()
+
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -54,16 +85,19 @@ class SettingsActivity : AppCompatActivity() {
         }
 
 
+
         save_btn.setOnClickListener {
             val storeId = store_id.text.toString()
             if (store_id != null) {
-                editor.putString("usertype", selected)
+                editor.putString("usertype", selectedUser)
+                editor.putString("depttype", selectedDept)
                 editor.putString("storeId",storeId)
                 editor.apply()
                 editor.commit()
 
-                if(selected.equals("customer")){
-                val intent = Intent(this@SettingsActivity, MainActivity::class.java)
+                if(!storeId.isEmpty()&&storeId.length==4){
+                if(selectedUser.equals("customer")){
+                val intent = Intent(this@SettingsActivity, DeptSelectionActivity::class.java)
                 finish()
                 this@SettingsActivity.startActivity(intent)
                 overridePendingTransition(
@@ -77,6 +111,9 @@ class SettingsActivity : AppCompatActivity() {
                         R.anim.fade_in,
                         R.anim.fade_out
                     )
+                }}
+                else{
+                    Toast.makeText(this, "Please enter a valid storeID", Toast.LENGTH_SHORT).show()
                 }
             }
 

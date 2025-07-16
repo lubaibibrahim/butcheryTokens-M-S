@@ -47,6 +47,10 @@
             android:name=".StoreActivity"
             android:screenOrientation="landscape"
             tools:ignore="DiscouragedApi" />
+        <activity
+            android:name=".DeptSelectionActivity"
+            android:screenOrientation="landscape"
+            tools:ignore="DiscouragedApi" />
 
     </application>
 

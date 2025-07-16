@@ -1,8 +1,15 @@
 <resources>
     <string name="app_name">Butchary Tokens</string>
     <string name="use_your_inaam_card_to_get_a_notification_when_your_item_is_ready">Use your INAAM card to get a notification when your item is ready!</string>
+    <string name="enter_mobile_inaam_number">Enter Mobile/INAAM Number</string>
+    <string name="department">Department</string>
     <string-array name="user_type_options">
         <item>customer</item>
         <item>store</item>
+    </string-array>
+
+    <string-array name="dept_type_options">
+        <item>Fish</item>
+        <item>Butchery</item>
     </string-array>
 </resources>

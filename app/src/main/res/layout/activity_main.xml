@@ -5,16 +5,53 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_image">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp">
+
+
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/nesto_wide_logo" />
+
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/inaam_logo" />
+
+    </RelativeLayout>
     <!-- Overlay content -->
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/contentLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
         android:layout_marginTop="100dp"
         android:padding="32dp">
 
+        <ImageView
+            android:id="@+id/backbtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentStart="true"
+            android:layout_margin="12dp"
+            android:foreground="?selectableItemBackground"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_back"
+            app:tint="@color/ColorAccent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
         <!-- Mobile Number Input -->
         <LinearLayout
             android:layout_width="700dp"
@@ -30,10 +67,11 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:hint="Enter Mobile/INAAM Number"
+                android:hint="@string/enter_mobile_inaam_number"
                 android:background="@android:color/transparent"
                 android:textSize="32sp"
                 android:gravity="center"
+                android:elevation="4dp"
                 android:maxLength="10"
                 android:focusable="true"
                 android:textColorHint="#2F2F2F"
@@ -54,44 +92,30 @@
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/use_your_inaam_card_to_get_a_notification_when_your_item_is_ready"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:layout_marginTop="16dp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"/>
+            android:gravity="center"/>
     </LinearLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp">
-
-
-    <ImageView
-        android:layout_width="200dp"
-        android:layout_height="80dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/nesto_wide_logo" />
-
-        <ImageView
-            android:layout_width="200dp"
-            android:layout_height="100dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/inaam_logo" />
-
     </RelativeLayout>
+
 
     <ImageView
         android:id="@+id/fishImage"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/fish_a" />
+
+    <ImageView
+        android:id="@+id/bubble_image"
+        android:layout_width="wrap_content"
         android:layout_height="100dp"
         android:layout_gravity="center"
         android:layout_alignParentBottom="true"

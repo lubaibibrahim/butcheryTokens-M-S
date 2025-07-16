@@ -13,8 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Token #:"
-        android:textSize="24sp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         android:textStyle="bold"
+        android:gravity="center"
         android:layout_margin="8dp"
         android:textColor="@color/black"/>
 
@@ -23,8 +24,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Customer:"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
         android:textColor="@color/black"
-        android:layout_margin="8dp"
         android:textStyle="bold"
         android:textSize="16sp" />
 
@@ -34,8 +36,8 @@
         android:layout_height="wrap_content"
         android:textColor="@color/ColorAccent"
         android:textStyle="bold"
+        android:gravity="center"
         android:layout_margin="8dp"
-        android:gravity="start"
         android:textSize="16sp" />
 
 </LinearLayout>

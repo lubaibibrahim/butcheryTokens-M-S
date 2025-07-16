@@ -43,7 +43,7 @@ class SplashActivity : Activity() {
             var typeVal = sharedPreferences.getString("usertype", "")
 
             if (typeVal.equals("customer")) {
-                val intent = Intent(this@SplashActivity, MainActivity::class.java)
+                val intent = Intent(this@SplashActivity, DeptSelectionActivity::class.java)
                 finish()
                 this@SplashActivity.startActivity(intent)
                 overridePendingTransition(
