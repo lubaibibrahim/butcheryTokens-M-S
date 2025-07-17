@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.nesto.butcharytokens.R
 import com.nesto.butcharytokens.model.TokenStatusUpdateResponse
@@ -46,10 +47,27 @@ class TokenAdapter(
         if (token != null) {
             holder.status.text = "Status: ${token.status}"
             holder.tokenNumber.text = "Token #: ${token.tokenNumber?.takeLast(3)}"
-            holder.contactNumber.text = "Contact: ${token.contactNumber}"
+            holder.contactNumber.text = "Customer: ${token.contactNumber}"
 
             holder.itemView.setOnClickListener {
-                updateTokenStatus(token.tokenNumber ?: "",position)
+
+                val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_confirmation, null)
+                val dialog = AlertDialog.Builder(context)
+                    .setView(dialogView)
+                    .create()
+
+                dialogView.findViewById<Button>(R.id.btnYes).setOnClickListener {
+                    updateTokenStatus(token.tokenNumber ?: "",position)
+                    dialog.dismiss()
+                }
+
+                dialogView.findViewById<Button>(R.id.btnNo).setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+                dialog.show()
+
             }
         }
     }

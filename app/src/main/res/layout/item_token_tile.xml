@@ -2,8 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/rounded_white"
+    android:background="@drawable/token_item_background"
     android:orientation="vertical"
+    android:foreground="?selectableItemBackground"
     android:padding="16dp"
     android:layout_margin="8dp"
     android:elevation="2dp">
@@ -13,8 +14,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Token #:"
-        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        android:textAllCaps="true"
         android:textStyle="bold"
+        android:fontFamily="sans-serif-black"
+        android:textSize="24dp"
         android:gravity="center"
         android:layout_margin="8dp"
         android:textColor="@color/black"/>
@@ -25,11 +28,9 @@
         android:layout_height="wrap_content"
         android:text="Customer:"
         android:gravity="center"
-        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
         android:textColor="@color/black"
         android:textStyle="bold"
-        android:textSize="16sp" />
-
+        android:textSize="20sp"/>
     <TextView
         android:id="@+id/status"
         android:layout_width="match_parent"

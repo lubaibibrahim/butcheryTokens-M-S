@@ -4,6 +4,8 @@
     <string name="enter_mobile_inaam_number">Enter Mobile/INAAM Number</string>
     <string name="department">Department</string>
     <string name="active_tokens">Active Tokens</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
     <string-array name="user_type_options">
         <item>customer</item>
         <item>store</item>

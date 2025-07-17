@@ -37,7 +37,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MainActivity : AppCompatActivity() {
+class CustomerActivity : AppCompatActivity() {
 
     private lateinit var usbManager: UsbManager
     private lateinit var etMobile: EditText
@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
                     //  Toast.makeText(this@MainActivity, "USB permission granted", Toast.LENGTH_SHORT) .show()
                     connectToPrinter()
                 } else {
-                    Toast.makeText(this@MainActivity, "USB permission denied", Toast.LENGTH_SHORT)
+                    Toast.makeText(this@CustomerActivity, "USB permission denied", Toast.LENGTH_SHORT)
                         .show()
                 }
             }
@@ -82,11 +82,6 @@ class MainActivity : AppCompatActivity() {
         etMobile = findViewById(R.id.et_mobile)
         var backbtn = findViewById<ImageView>(R.id.backbtn)
         btnPrint = findViewById(R.id.btn_generate_token)
-        val fishImage = findViewById<ImageView>(R.id.fishImage)
-        val bubble_image = findViewById<ImageView>(R.id.bubble_image)
-        val animation = AnimationUtils.loadAnimation(this, R.anim.move_fish)
-        fishImage.startAnimation(animation)
-        bubble_image.startAnimation(animation)
 
         usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
         posPrinter = POSPrinter(this)
@@ -107,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         btnPrint.setOnClickListener {
             mobileNumber = etMobile.text.toString().trim()
             tokenNo = generateTokenNumber(this, storeId)
-            if(!mobileNumber.equals("")) {
+            if(!mobileNumber.equals("")&&mobileNumber.length>9) {
                 UploadToken(tokenNo, mobileNumber, storeId)
             }else{
                 Toast.makeText(this, "Please enter a valid mobile/Inaam number!", Toast.LENGTH_SHORT).show()
@@ -228,7 +223,7 @@ class MainActivity : AppCompatActivity() {
                         CustomerName= response.body()?.name.toString()
 //                      text to speech
                         setTTSVolumeMax()
-                        val Text = "Thank you "+response.body()?.name
+                        val Text = "Thank you $CustomerName"
                         englishSpeaker.speak(Text)
 
                         requestUsbPermission()
@@ -236,16 +231,15 @@ class MainActivity : AppCompatActivity() {
                         btnPrint.postDelayed({ btnPrint.isEnabled = true }, 2000)
                     } else {
                         Toast.makeText(
-                            this@MainActivity, response.message(), Toast.LENGTH_SHORT
+                            this@CustomerActivity, response.message(), Toast.LENGTH_SHORT
                         ).show()
                     }
                 } else {
                     Toast.makeText(
-                        this@MainActivity, response.message(), Toast.LENGTH_SHORT
+                        this@CustomerActivity, response.message(), Toast.LENGTH_SHORT
                     ).show()
                 }
                 dialog.cancel()
-                finish()
             }
 
             override fun onFailure(call: Call<NewTokenResponse??>, t: Throwable) {
@@ -347,10 +341,38 @@ class MainActivity : AppCompatActivity() {
                 posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, "\n\n\n\n\n")
                 posPrinter.cutPaper(90)
             }
-
-
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish()
+            }, 4000) // goto previous activity 4 seconds after printing
         } catch (e: JposException) {
             Log.e("BIXOLON", "Print error: ${e.message}", e)
         }
     }
+
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val backRunnable = Runnable {
+        finish() // This will close the current activity and return to the previous one
+    }
+
+    override fun onResume() {
+        super.onResume()
+        resetInactivityTimer()
+    }
+
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+        resetInactivityTimer() // Reset the timer on any user interaction (touch, key, etc.)
+    }
+
+    private fun resetInactivityTimer() {
+        handler.removeCallbacks(backRunnable)
+        handler.postDelayed(backRunnable, 15_000) // go to previous activity after 15 seconds of inactivity
+    }
+
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(backRunnable)
+    }
+
 }

@@ -41,6 +41,7 @@ class EnglishSpeaker(context: Context) {
 
     fun speak(text: String) {
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "english_speech")
+
     }
 
     fun shutdown() {

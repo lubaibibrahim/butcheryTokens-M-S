@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -32,7 +33,8 @@ class StoreActivity : AppCompatActivity() {
         setContentView(R.layout.activity_store)
 
         recyclerView = findViewById(R.id.recycler_tokens)
-        recyclerView.layoutManager = GridLayoutManager(this, 2) // 2 tiles per row
+        var refresh_btn = findViewById<ImageView>(R.id.refresh_btn)
+        recyclerView.layoutManager = GridLayoutManager(this, 3) // 3 tiles per row
 
         sharedPreferences = this.getSharedPreferences("sharedpreferences", MODE_PRIVATE)
         editor = sharedPreferences.edit()
@@ -40,6 +42,10 @@ class StoreActivity : AppCompatActivity() {
         dept = sharedPreferences.getString("depttype", "").toString()
 
         Tokenlist(storeId.toString(),dept)
+
+        refresh_btn.setOnClickListener {
+            Tokenlist(storeId.toString(),dept)
+        }
     }
 
     private val handler = Handler(Looper.getMainLooper())

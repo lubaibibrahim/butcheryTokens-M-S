@@ -39,7 +39,7 @@
             android:screenOrientation="landscape"
             tools:ignore="DiscouragedApi" />
         <activity
-            android:name=".MainActivity"
+            android:name=".CustomerActivity"
             android:screenOrientation="landscape"
             tools:ignore="DiscouragedApi" />
 

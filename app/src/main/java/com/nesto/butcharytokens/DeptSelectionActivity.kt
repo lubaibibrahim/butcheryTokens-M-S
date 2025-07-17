@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import com.nesto.butcharytokens.SplashActivity
 
 class DeptSelectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,7 +14,7 @@ class DeptSelectionActivity : AppCompatActivity() {
         var butchery_btn = findViewById<ImageView>(R.id.butchery_btn)
 
         fishery_btn.setOnClickListener {
-            val intent = Intent(this@DeptSelectionActivity, MainActivity::class.java)
+            val intent = Intent(this@DeptSelectionActivity, CustomerActivity::class.java)
             intent.putExtra("dept","fish")
             this@DeptSelectionActivity.startActivity(intent)
             overridePendingTransition(
@@ -25,7 +24,7 @@ class DeptSelectionActivity : AppCompatActivity() {
 
         }
         butchery_btn.setOnClickListener {
-            val intent = Intent(this@DeptSelectionActivity, MainActivity::class.java)
+            val intent = Intent(this@DeptSelectionActivity, CustomerActivity::class.java)
             intent.putExtra("dept","butchery")
             this@DeptSelectionActivity.startActivity(intent)
             overridePendingTransition(
