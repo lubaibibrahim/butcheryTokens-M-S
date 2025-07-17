@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Butchary Tokens</string>
-    <string name="use_your_inaam_card_to_get_a_notification_when_your_item_is_ready">Use your INAAM card to get a notification when your item is ready!</string>
+    <string name="use_your_inaam_card_to_get_a_notification_when_your_item_is_ready">Scan your INAAM card to get a notification when your item is ready!</string>
     <string name="enter_mobile_inaam_number">Enter Mobile/INAAM Number</string>
     <string name="department">Department</string>
     <string name="active_tokens">Active Tokens</string>

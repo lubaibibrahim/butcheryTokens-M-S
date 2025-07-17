@@ -36,6 +36,8 @@ class EnglishSpeaker(context: Context) {
         preferredVoice?.let {
             Log.d("TTS", "Using voice: ${it.name}")
             tts?.voice = it
+            tts!!.setSpeechRate(0.95f)
+            tts!!.setPitch(1.0f)
         }
     }
 

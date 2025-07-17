@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.hardware.usb.UsbDevice
@@ -33,6 +34,8 @@ import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import android.widget.ImageView
+import android.widget.RelativeLayout
+import androidx.core.content.ContextCompat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -48,6 +51,7 @@ class CustomerActivity : AppCompatActivity() {
     private lateinit var tokenNo: String
     private var CustomerName: String=""
     lateinit var englishSpeaker: EnglishSpeaker
+    lateinit var arabicSpeaker: ArabicSpeaker
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
@@ -74,11 +78,12 @@ class CustomerActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    @SuppressLint("UnspecifiedRegisterReceiverFlag", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        var page_background = findViewById<RelativeLayout>(R.id.page_background)
         etMobile = findViewById(R.id.et_mobile)
         var backbtn = findViewById<ImageView>(R.id.backbtn)
         btnPrint = findViewById(R.id.btn_generate_token)
@@ -86,11 +91,24 @@ class CustomerActivity : AppCompatActivity() {
         usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
         posPrinter = POSPrinter(this)
         englishSpeaker = EnglishSpeaker(this)
+        arabicSpeaker = ArabicSpeaker(this)
 
         sharedPreferences = this.getSharedPreferences("sharedpreferences", Context.MODE_PRIVATE)
         editor = sharedPreferences.edit()
         storeId = sharedPreferences.getString("storeId", "").toString()
         dept= intent.getStringExtra("dept").toString()
+
+        if(dept.equals("fish")){
+            page_background.background = ContextCompat.getDrawable(this, R.drawable.fish_bg)
+            backbtn.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.fish_blue))
+            btnPrint.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.fish_blue))
+        }else{
+            page_background.background = ContextCompat.getDrawable(this, R.drawable.butchery_bg)
+            backbtn.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.butchery_red))
+            btnPrint.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.butchery_red))
+        }
+
+
 
         backbtn.setOnClickListener {
             onBackPressed()
@@ -102,6 +120,7 @@ class CustomerActivity : AppCompatActivity() {
         btnPrint.setOnClickListener {
             mobileNumber = etMobile.text.toString().trim()
             tokenNo = generateTokenNumber(this, storeId)
+
             if(!mobileNumber.equals("")&&mobileNumber.length>9) {
                 UploadToken(tokenNo, mobileNumber, storeId)
             }else{
@@ -180,6 +199,7 @@ class CustomerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         englishSpeaker.shutdown()
+        arabicSpeaker.shutdown()
         super.onDestroy()
         try {
             if (::posPrinter.isInitialized && isPrinterConnected) {
@@ -225,6 +245,8 @@ class CustomerActivity : AppCompatActivity() {
                         setTTSVolumeMax()
                         val Text = "Thank you $CustomerName"
                         englishSpeaker.speak(Text)
+
+//                        arabicSpeaker.speak("شكراً يا أبين")
 
                         requestUsbPermission()
                         btnPrint.isEnabled = false
