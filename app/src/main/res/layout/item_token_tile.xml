@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/token_item_background"
     android:orientation="vertical"
-    android:foreground="?selectableItemBackground"
-    android:padding="16dp"
     android:layout_margin="8dp"
+    android:foreground="?selectableItemBackground"
     android:elevation="2dp">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_margin="8dp"
+        android:orientation="vertical">
     <TextView
         android:id="@+id/token_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Token #:"
+        android:text="@string/token"
         android:textAllCaps="true"
         android:textStyle="bold"
         android:fontFamily="sans-serif-black"
-        android:textSize="24dp"
+        android:textSize="24sp"
         android:gravity="center"
         android:layout_margin="8dp"
         android:textColor="@color/black"/>
@@ -26,7 +31,7 @@
         android:id="@+id/contact_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Customer:"
+        android:text="@string/customer"
         android:gravity="center"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -42,3 +47,4 @@
         android:textSize="16sp" />
 
 </LinearLayout>
+</RelativeLayout>

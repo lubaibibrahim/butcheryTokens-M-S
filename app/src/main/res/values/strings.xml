@@ -6,6 +6,8 @@
     <string name="active_tokens">Active Tokens</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
+    <string name="token">Token #:</string>
+    <string name="customer">Customer:</string>
     <string-array name="user_type_options">
         <item>customer</item>
         <item>store</item>
