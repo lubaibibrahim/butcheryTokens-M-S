@@ -50,6 +50,7 @@ class CustomerActivity : AppCompatActivity() {
     private lateinit var dept: String
     private lateinit var tokenNo: String
     private var CustomerName: String=""
+    private var customerUrl: String=""
     lateinit var englishSpeaker: EnglishSpeaker
     lateinit var arabicSpeaker: ArabicSpeaker
 
@@ -119,9 +120,12 @@ class CustomerActivity : AppCompatActivity() {
 
         btnPrint.setOnClickListener {
             mobileNumber = etMobile.text.toString().trim()
+            if (mobileNumber.startsWith("0")) {
+                mobileNumber = mobileNumber.substring(1)
+            }
             tokenNo = generateTokenNumber(this, storeId)
 
-            if(!mobileNumber.equals("")&&mobileNumber.length>9) {
+            if(!mobileNumber.equals("")&&mobileNumber.length>8) {
                 UploadToken(tokenNo, mobileNumber, storeId)
             }else{
                 Toast.makeText(this, "Please enter a valid mobile/Inaam number!", Toast.LENGTH_SHORT).show()
@@ -183,7 +187,7 @@ class CustomerActivity : AppCompatActivity() {
             val currentTime =
                 SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
 
-            printTokenWithBixolon(tokenNo, mobileNumber, CustomerName, posPrinter)
+            printTokenWithBixolon(tokenNo, customerUrl, CustomerName, posPrinter)
 
         } catch (e: JposException) {
             Toast.makeText(this, "Printing failed: ${e.message}", Toast.LENGTH_LONG).show()
@@ -240,13 +244,19 @@ class CustomerActivity : AppCompatActivity() {
                 if (response.isSuccessful()) {
                     assert(response.body() != null)
                     if (response.body()?.name?.isEmpty() != true) {
-                        CustomerName= response.body()?.name.toString()
-//                      text to speech
-                        setTTSVolumeMax()
-                        val Text = "Thank you $CustomerName"
-                        englishSpeaker.speak(Text)
+                        CustomerName= response.body()?.token?.name.toString()
+                        var CustomerLanguage = response.body()?.token?.language.toString()
+                        customerUrl = response.body()?.token?.customerUrl.toString()
 
-//                        arabicSpeaker.speak("شكراً يا أبين")
+                        //text to speech
+                        setTTSVolumeMax()
+                        if(CustomerLanguage.equals("English")) {
+                            val Text = "Thank you $CustomerName"
+                            englishSpeaker.speak(Text)
+                        }else{
+                            val Text = "Shukran +$CustomerName"
+                            arabicSpeaker.speak(Text)
+                        }
 
                         requestUsbPermission()
                         btnPrint.isEnabled = false
@@ -310,7 +320,7 @@ class CustomerActivity : AppCompatActivity() {
 
     fun printTokenWithBixolon(
         tokenNumber: String,
-        mobileNumber: String,
+        customerUrl: String,
         name: String,
         posPrinter: jpos.POSPrinter
     ) {
@@ -331,7 +341,6 @@ class CustomerActivity : AppCompatActivity() {
                 append("\u001b|bC\u001b|4C") //Big font
                 append("Token: ${tokenNumber.takeLast(4)}\n")
                 append("\u001b|1C") //Back to normal font
-                append("$mobileNumber\n")
                 append("Customer: $name\n")
                 append("\u001b|N")
                 append("\u001b|cA")
@@ -348,7 +357,7 @@ class CustomerActivity : AppCompatActivity() {
                 // Print barcode
                 posPrinter.printBarCode(
                     POSPrinterConst.PTR_S_RECEIPT,
-                    tokenNumber, // Use token as QR content
+                    customerUrl, // Use token as QR content
                     POSPrinterConst.PTR_BCS_QRCODE,
                     8,
                     8,

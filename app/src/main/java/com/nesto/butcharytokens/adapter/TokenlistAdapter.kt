@@ -47,7 +47,7 @@ class TokenAdapter(
         if (token != null) {
             holder.status.text = "Status: ${token.status}"
             holder.tokenNumber.text = "Token #: ${token.tokenNumber?.takeLast(3)}"
-            holder.contactNumber.text = "Customer: ${token.contactNumber}"
+            holder.contactNumber.text = "Customer: ${token.name}"
 
             holder.itemView.setOnClickListener {
 

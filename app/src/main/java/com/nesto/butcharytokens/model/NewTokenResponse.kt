@@ -25,6 +25,12 @@ data class Token(
 	@field:SerializedName("id")
 	val id: Int? = null,
 
+	@field:SerializedName("language")
+	val language: String? = null,
+
+	@field:SerializedName("name")
+	val name: String? = null,
+
 	@field:SerializedName("token_number")
 	val tokenNumber: String? = null,
 

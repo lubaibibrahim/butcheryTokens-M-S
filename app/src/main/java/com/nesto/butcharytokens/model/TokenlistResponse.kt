@@ -23,7 +23,10 @@ data class TokenlistResponseItem(
 	val id: Int? = null,
 
 	@field:SerializedName("token_number")
-	val tokenNumber: String? = null,
+	val tokenNumber: String? = null	,
+
+	@field:SerializedName("name")
+	val name: String? = null,
 
 	@field:SerializedName("store")
 	val store: String? = null,
