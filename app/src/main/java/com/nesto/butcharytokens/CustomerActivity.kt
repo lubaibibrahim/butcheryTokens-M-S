@@ -125,7 +125,7 @@ class CustomerActivity : AppCompatActivity() {
             }
             tokenNo = generateTokenNumber(this, storeId)
 
-            if(!mobileNumber.equals("")&&mobileNumber.length>8) {
+            if(!mobileNumber.equals("")&&mobileNumber.length>7) {
                 UploadToken(tokenNo, mobileNumber, storeId)
             }else{
                 Toast.makeText(this, "Please enter a valid mobile/Inaam number!", Toast.LENGTH_SHORT).show()
@@ -349,7 +349,7 @@ class CustomerActivity : AppCompatActivity() {
                 append("Scan the QR code to know the status\n")
             }
 
-            repeat(1) {   // 2copies of printouts
+            repeat(2) {   // 2copies of printouts
                 // Print header
                 posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, header)
                 posPrinter.printNormal(POSPrinterConst.PTR_S_RECEIPT, "\n")
