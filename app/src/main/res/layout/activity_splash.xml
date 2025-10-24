@@ -23,7 +23,7 @@
             android:layout_margin="16dp"
             android:layout_gravity="center"
             android:adjustViewBounds="true"
-            android:src="@drawable/nesto_wide_logo"
+            android:src="@drawable/markandsave_logo"
             tools:ignore="Suspicious0dp" />
 
         <LinearLayout

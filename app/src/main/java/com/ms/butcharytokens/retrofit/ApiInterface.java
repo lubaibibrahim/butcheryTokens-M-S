@@ -1,10 +1,9 @@
-package com.nesto.butcharytokens.retrofit;
+package com.ms.butcharytokens.retrofit;
 
-import com.nesto.butcharytokens.model.NewTokenRequest;
-import com.nesto.butcharytokens.model.NewTokenResponse;
-import com.nesto.butcharytokens.model.TokenStatusUpdateResponse;
-import com.nesto.butcharytokens.model.TokenlistResponse;
-import com.nesto.butcharytokens.model.TokenlistResponseItem;
+import com.ms.butcharytokens.model.NewTokenRequest;
+import com.ms.butcharytokens.model.NewTokenResponse;
+import com.ms.butcharytokens.model.TokenStatusUpdateResponse;
+import com.ms.butcharytokens.model.TokenlistResponseItem;
 
 import java.util.ArrayList;
 

@@ -1,8 +1,7 @@
-package com.nesto.butcharytokens
+package com.ms.butcharytokens
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
-import android.speech.tts.Voice
 import java.util.*
 
 class ArabicSpeaker(context: Context) : TextToSpeech.OnInitListener {

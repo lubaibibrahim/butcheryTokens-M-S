@@ -1,4 +1,4 @@
-package com.nesto.butcharytokens
+package com.ms.butcharytokens
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -19,15 +19,14 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bxl.config.editor.BXLConfigLoader
-import com.nesto.butcharytokens.model.NewTokenRequest
-import com.nesto.butcharytokens.model.NewTokenResponse
-import com.nesto.butcharytokens.retrofit.ApiClient
-import com.nesto.butcharytokens.retrofit.ApiInterface
+import com.ms.butcharytokens.model.NewTokenRequest
+import com.ms.butcharytokens.model.NewTokenResponse
+import com.ms.butcharytokens.retrofit.ApiClient
+import com.ms.butcharytokens.retrofit.ApiInterface
 import jpos.POSPrinter
 import jpos.POSPrinterConst
 import jpos.JposException
 import retrofit2.Call
-import android.view.animation.AnimationUtils
 import retrofit2.Callback
 import retrofit2.Response
 import android.media.AudioManager
@@ -36,6 +35,7 @@ import android.os.Looper
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
+import com.ms.butcharytokens.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -56,7 +56,7 @@ class CustomerActivity : AppCompatActivity() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
-    private val ACTION_USB_PERMISSION = "com.nesto.butcharytokens.USB_PERMISSION"
+    private val ACTION_USB_PERMISSION = "com.ms.butcharytokens.USB_PERMISSION"
     private val logicalName = "SRP-350plusIII"
     private lateinit var posPrinter: POSPrinter
     private var isPrinterConnected = false
@@ -128,7 +128,7 @@ class CustomerActivity : AppCompatActivity() {
             if(!mobileNumber.equals("")&&mobileNumber.length>7) {
                 UploadToken(tokenNo, mobileNumber, storeId)
             }else{
-                Toast.makeText(this, "Please enter a valid mobile/Inaam number!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please enter a valid mobile/WeRewards number!", Toast.LENGTH_SHORT).show()
             }
 //            //printing
 
@@ -329,7 +329,7 @@ class CustomerActivity : AppCompatActivity() {
             val currentTime =SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale("en", "IN")).format(Date())
             val header = """
             $deptValue
-            NESTO FRESH
+            Mark & Save
             $currentTime
             ------------------------------
         """.trimIndent()

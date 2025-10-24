@@ -1,4 +1,4 @@
-package com.nesto.butcharytokens
+package com.ms.butcharytokens
 
 import android.content.Context
 import android.content.Intent
@@ -13,7 +13,7 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.nesto.butcharytokens.SplashActivity
+import com.ms.butcharytokens.R
 
 class SettingsActivity : AppCompatActivity() {
 

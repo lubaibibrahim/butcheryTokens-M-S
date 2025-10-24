@@ -1,4 +1,4 @@
-package com.nesto.butcharytokens
+package com.ms.butcharytokens
 
 import org.junit.Test
 

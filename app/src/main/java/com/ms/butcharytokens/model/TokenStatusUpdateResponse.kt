@@ -1,4 +1,4 @@
-package com.nesto.butcharytokens.model
+package com.ms.butcharytokens.model
 
 import com.google.gson.annotations.SerializedName
 

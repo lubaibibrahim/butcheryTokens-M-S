@@ -1,4 +1,4 @@
-package com.nesto.butcharytokens.adapter
+package com.ms.butcharytokens.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -12,11 +12,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
-import com.nesto.butcharytokens.R
-import com.nesto.butcharytokens.model.TokenStatusUpdateResponse
-import com.nesto.butcharytokens.model.TokenlistResponseItem
-import com.nesto.butcharytokens.retrofit.ApiClient
-import com.nesto.butcharytokens.retrofit.ApiInterface
+import com.ms.butcharytokens.model.TokenStatusUpdateResponse
+import com.ms.butcharytokens.model.TokenlistResponseItem
+import com.ms.butcharytokens.retrofit.ApiClient
+import com.ms.butcharytokens.retrofit.ApiInterface
+import com.ms.butcharytokens.R
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

@@ -1,9 +1,10 @@
-package com.nesto.butcharytokens
+package com.ms.butcharytokens
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import com.ms.butcharytokens.R
 
 class DeptSelectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

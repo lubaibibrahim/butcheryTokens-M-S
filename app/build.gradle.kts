@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.nesto.butcharytokens"
+    namespace = "com.ms.butcharytokens"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.nesto.butcharytokens"
+        applicationId = "com.ms.butcharytokens"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
